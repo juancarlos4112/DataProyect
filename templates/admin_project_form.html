@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Editar' if proyecto else 'Nuevo' }} proyecto · {{ app_name }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>{{ 'Editar proyecto' if proyecto else 'Nuevo proyecto' }}</h1>
+    <p class="muted">Define el sitio y los destinatarios del correo.</p>
+  </div>
+</div>
+
+{% if not clientes %}
+<div class="empty">
+  <h3>Primero crea un cliente</h3>
+  <p class="muted">Un proyecto siempre pertenece a un cliente.</p>
+  <a class="btn btn-primary" href="{{ url_for('admin_client_form') }}">Crear cliente</a>
+</div>
+{% else %}
+<form method="post" class="form">
+  <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+  <section class="card">
+    <div class="grid2">
+      <label class="field full">
+        <span>Cliente *</span>
+        <select name="client_id" required>
+          <option value="">Selecciona…</option>
+          {% for c in clientes %}
+          <option value="{{ c.id }}" {{ 'selected' if proyecto and proyecto.client_id == c.id }}>{{ c.name }}</option>
+          {% endfor %}
+        </select>
+      </label>
+      <label class="field full">
+        <span>Nombre del proyecto *</span>
+        <input name="name" required value="{{ proyecto.name if proyecto else '' }}"
+               placeholder="Ej.: Data center principal, sucursal Providencia">
+      </label>
+      <label class="field full">
+        <span>Sitio / dirección</span>
+        <input name="site" value="{{ proyecto.site if proyecto else '' }}"
+               placeholder="Dirección donde está el rack">
+      </label>
+      <label class="field full">
+        <span>Racks / gabinetes</span>
+        <input name="racks" value="{{ proyecto.racks if proyecto else '' }}"
+               placeholder="RACK-01, RACK-02">
+      </label>
+      <label class="field full">
+        <span>Correos destinatarios *</span>
+        <textarea name="recipients" rows="2" required
+                  placeholder="cliente@empresa.cl, jefe@empresa.cl">{{ proyecto.recipients if proyecto else '' }}</textarea>
+        <small class="hint">Sepáralos con coma, punto y coma o salto de línea.</small>
+      </label>
+      <label class="field full">
+        <span>Con copia (CC)</span>
+        <textarea name="cc" rows="2"
+                  placeholder="supervisor@miempresa.cl">{{ proyecto.cc if proyecto else '' }}</textarea>
+      </label>
+    </div>
+  </section>
+  <div class="actions">
+    <button class="btn btn-primary" type="submit">Guardar proyecto</button>
+    <a class="btn btn-ghost" href="{{ url_for('admin_projects') }}">Cancelar</a>
+  </div>
+</form>
+{% endif %}
+{% endblock %}

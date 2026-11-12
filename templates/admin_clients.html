@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Clientes · {{ app_name }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Clientes</h1>
+    <p class="muted">Mantenedor de clientes y sus contactos.</p>
+  </div>
+  <a class="btn btn-primary" href="{{ url_for('admin_client_form') }}">+ Cliente</a>
+</div>
+
+{% if clientes %}
+<div class="list">
+  {% for c in clientes %}
+  <div class="row">
+    <div class="row-main">
+      <div class="row-top">
+        <strong>{{ c.name }}</strong>
+        {% if not c.active %}<span class="chip">Inactivo</span>{% endif %}
+      </div>
+      <div class="row-sub">{{ c.rut or 'Sin RUT' }} · {{ c.email or 'sin correo' }}</div>
+      <div class="row-meta">{{ c.proyectos }} proyecto(s){% if c.contact %} · {{ c.contact }}{% endif %}</div>
+    </div>
+    <div class="row-actions">
+      <a class="btn btn-ghost btn-sm" href="{{ url_for('admin_client_form', cid=c.id) }}">Editar</a>
+      <form method="post" action="{{ url_for('admin_client_toggle', cid=c.id) }}">
+        <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+        <button class="btn btn-ghost btn-sm" type="submit">{{ 'Desactivar' if c.active else 'Activar' }}</button>
+      </form>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty">
+  <h3>Sin clientes</h3>
+  <p class="muted">Crea el primer cliente para luego asociarle proyectos.</p>
+  <a class="btn btn-primary" href="{{ url_for('admin_client_form') }}">Crear cliente</a>
+</div>
+{% endif %}
+{% endblock %}

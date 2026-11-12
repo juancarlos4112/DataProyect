@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}{{ orden.code }} · {{ app_name }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>{{ orden.code }}</h1>
+    <p class="muted">{{ orden.performed_at|fecha }} · {{ orden.type|tipo }}</p>
+  </div>
+  {% if orden.email_status == 'enviado' %}
+    <span class="chip ok">Correo enviado</span>
+  {% elif orden.email_status == 'simulado' %}
+    <span class="chip warn">SMTP sin configurar</span>
+  {% elif orden.email_status == 'error' %}
+    <span class="chip err">Correo falló</span>
+  {% endif %}
+</div>
+
+<section class="card">
+  <h2>Datos del servicio</h2>
+  <div class="kv"><span>Cliente</span><b>{{ orden.client_name }}</b></div>
+  <div class="kv"><span>Proyecto</span><b>{{ orden.project_name }}</b></div>
+  <div class="kv"><span>Sitio</span><b>{{ orden.site or orden.project_site or '-' }}</b></div>
+  <div class="kv"><span>Rack / gabinete</span><b>{{ orden.rack or '-' }}</b></div>
+  <div class="kv"><span>Técnico</span><b>{{ orden.tech_name }}</b></div>
+  <div class="kv"><span>Recibe</span><b>{{ orden.receiver or '-' }}</b></div>
+  <div class="kv"><span>Destinatarios</span><b>{{ orden.email_to or orden.recipients or '-' }}</b></div>
+  {% if orden.email_cc %}<div class="kv"><span>Copia</span><b>{{ orden.email_cc }}</b></div>{% endif %}
+</section>
+
+<section class="card">
+  <h2>Checklist</h2>
+  <div class="checklist-view">
+    {% for it in items %}
+    <div class="check-view">
+      <span class="dot {{ it.status }}"></span>
+      <div>
+        <div class="cv-label">{{ etiquetas.get(it.key, it.key) }}</div>
+        {% if it.note %}<div class="cv-note">{{ it.note }}</div>{% endif %}
+      </div>
+      <span class="chip {{ 'ok' if it.status == 'ok' else ('warn' if it.status == 'obs' else '') }}">
+        {{ status_labels.get(it.status, it.status) }}
+      </span>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+
+<section class="card">
+  <h2>Trabajo realizado</h2>
+  <p class="pre">{{ orden.work }}</p>
+  {% if orden.materials %}
+  <h3>Materiales y repuestos</h3>
+  <p class="pre">{{ orden.materials }}</p>
+  {% endif %}
+  {% if orden.observations %}
+  <h3>Observaciones y recomendaciones</h3>
+  <p class="pre">{{ orden.observations }}</p>
+  {% endif %}
+</section>
+
+{% if fotos %}
+<section class="card">
+  <h2>Registro fotográfico</h2>
+  <div class="gallery">
+    {% for f in fotos %}
+    <a href="{{ url_for('photo_file', fid=f.id) }}" target="_blank" class="shot">
+      <img src="{{ url_for('photo_file', fid=f.id) }}" alt="Foto {{ loop.index }}" loading="lazy">
+      <span>{{ 'Antes' if f.kind == 'antes' else ('Después' if f.kind == 'despues' else 'Registro') }}</span>
+    </a>
+    {% endfor %}
+  </div>
+</section>
+{% endif %}
+
+{% if orden.signature_file %}
+<section class="card">
+  <h2>Firma</h2>
+  <img class="firma-img" src="{{ url_for('signature_file', oid=orden.id) }}" alt="Firma">
+</section>
+{% endif %}
+
+{% if orden.email_detail %}
+<section class="card">
+  <h2>Estado del correo</h2>
+  <p class="muted small">{{ orden.email_detail }}</p>
+</section>
+{% endif %}
+
+<div class="actions">
+  <a class="btn btn-primary" href="{{ url_for('order_pdf', oid=orden.id) }}">Descargar PDF</a>
+  <form method="post" action="{{ url_for('order_resend', oid=orden.id) }}">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <button class="btn btn-ghost" type="submit">Reenviar correo</button>
+  </form>
+  <a class="btn btn-ghost" href="{{ url_for('dashboard') }}">Volver</a>
+</div>
+{% endblock %}

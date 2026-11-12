@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block title %}Ingresar · {{ app_name }}{% endblock %}
+{% block content %}
+<section class="login-card">
+  <div class="login-logo"><span class="brand-dot"></span></div>
+  <h1>Órdenes de Servicio</h1>
+  <p class="muted">Mantención de rack · acceso técnicos</p>
+
+  {% if error %}<div class="flash error">{{ error }}</div>{% endif %}
+
+  <form method="post" class="form">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <input type="hidden" name="next" value="{{ next }}">
+    <label class="field">
+      <span>Correo</span>
+      <input type="email" name="email" autocomplete="username" required autofocus
+             placeholder="tecnico@empresa.cl">
+    </label>
+    <label class="field">
+      <span>Contraseña</span>
+      <input type="password" name="password" autocomplete="current-password" required placeholder="••••••••">
+    </label>
+    <button class="btn btn-primary btn-block" type="submit">Ingresar</button>
+  </form>
+  <p class="muted small">Si olvidaste tu clave, pídele al administrador que la restablezca.</p>
+</section>
+{% endblock %}

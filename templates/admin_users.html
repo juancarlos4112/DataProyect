@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% block title %}Usuarios · {{ app_name }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Usuarios</h1>
+    <p class="muted">Técnicos y administradores con acceso a la app.</p>
+  </div>
+  <a class="btn btn-primary" href="{{ url_for('admin_user_form') }}">+ Usuario</a>
+</div>
+
+{% if usuarios %}
+<div class="list">
+  {% for u in usuarios %}
+  <div class="row">
+    <div class="row-main">
+      <div class="row-top">
+        <strong>{{ u.name }}</strong>
+        <span class="chip">{{ 'Administrador' if u.role == 'admin' else 'Técnico' }}</span>
+        {% if not u.active %}<span class="chip">Inactivo</span>{% endif %}
+      </div>
+      <div class="row-sub">{{ u.email }}</div>
+      <div class="row-meta">{{ u.ordenes }} orden(es) registrada(s)</div>
+    </div>
+    <div class="row-actions">
+      <a class="btn btn-ghost btn-sm" href="{{ url_for('admin_user_form', uid=u.id) }}">Editar</a>
+      {% if u.id != user.id %}
+      <form method="post" action="{{ url_for('admin_user_toggle', uid=u.id) }}">
+        <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+        <button class="btn btn-ghost btn-sm" type="submit">{{ 'Desactivar' if u.active else 'Activar' }}</button>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty"><h3>Sin usuarios</h3></div>
+{% endif %}
+{% endblock %}

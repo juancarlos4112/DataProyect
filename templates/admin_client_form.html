@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Editar' if cliente else 'Nuevo' }} cliente · {{ app_name }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>{{ 'Editar cliente' if cliente else 'Nuevo cliente' }}</h1>
+    <p class="muted">Datos de la empresa y su contacto principal.</p>
+  </div>
+</div>
+
+<form method="post" class="form">
+  <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+  <section class="card">
+    <div class="grid2">
+      <label class="field full">
+        <span>Nombre o razón social *</span>
+        <input name="name" required value="{{ cliente.name if cliente else '' }}" autocomplete="organization">
+      </label>
+      <label class="field">
+        <span>RUT</span>
+        <input name="rut" value="{{ cliente.rut if cliente else '' }}" placeholder="76.123.456-7">
+      </label>
+      <label class="field">
+        <span>Teléfono</span>
+        <input name="phone" value="{{ cliente.phone if cliente else '' }}" placeholder="+56 9 1234 5678">
+      </label>
+      <label class="field">
+        <span>Contacto</span>
+        <input name="contact" value="{{ cliente.contact if cliente else '' }}" placeholder="Nombre del contacto">
+      </label>
+      <label class="field">
+        <span>Correo</span>
+        <input type="email" name="email" value="{{ cliente.email if cliente else '' }}" placeholder="contacto@cliente.cl">
+      </label>
+      <label class="field full">
+        <span>Dirección</span>
+        <input name="address" value="{{ cliente.address if cliente else '' }}" placeholder="Calle, número, comuna">
+      </label>
+      <label class="field full">
+        <span>Notas internas</span>
+        <textarea name="notes" rows="2">{{ cliente.notes if cliente else '' }}</textarea>
+      </label>
+    </div>
+  </section>
+  <div class="actions">
+    <button class="btn btn-primary" type="submit">Guardar cliente</button>
+    <a class="btn btn-ghost" href="{{ url_for('admin_clients') }}">Cancelar</a>
+  </div>
+</form>
+{% endblock %}

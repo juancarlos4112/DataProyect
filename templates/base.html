@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>{% block title %}{{ app_name }}{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/app.css') }}">
+  <link rel="manifest" href="{{ url_for('static', filename='manifest.json') }}">
+  <meta name="theme-color" content="#0f172a">
+  <link rel="icon" href="{{ url_for('static', filename='icon.svg') }}">
+</head>
+<body>
+{% if user %}
+<header class="topbar">
+  <div class="topbar-in">
+    <a class="brand" href="{{ url_for('dashboard') }}">
+      <span class="brand-dot"></span>
+      <span class="brand-txt">{{ company }}</span>
+    </a>
+    <div class="userbox">
+      <span class="user-name">{{ user.name }}</span>
+      <a class="salir" href="{{ url_for('logout') }}">Salir</a>
+    </div>
+  </div>
+  <nav class="nav">
+    <a href="{{ url_for('dashboard') }}" class="{{ 'on' if request.endpoint == 'dashboard' }}">Órdenes</a>
+    <a href="{{ url_for('order_new') }}" class="{{ 'on' if request.endpoint == 'order_new' }}">Nueva orden</a>
+    {% if user.role == 'admin' %}
+      <a href="{{ url_for('admin_clients') }}" class="{{ 'on' if request.endpoint and 'client' in request.endpoint }}">Clientes</a>
+      <a href="{{ url_for('admin_projects') }}" class="{{ 'on' if request.endpoint and 'project' in request.endpoint }}">Proyectos</a>
+      <a href="{{ url_for('admin_users') }}" class="{{ 'on' if request.endpoint and 'user' in request.endpoint }}">Usuarios</a>
+      <a href="{{ url_for('admin_config') }}" class="{{ 'on' if request.endpoint and 'config' in request.endpoint }}">Configuración</a>
+    {% endif %}
+  </nav>
+</header>
+{% endif %}
+
+<main class="wrap">
+  {% with mensajes = get_flashed_messages(with_categories=true) %}
+    {% if mensajes %}
+      <div class="flashes">
+        {% for categoria, texto in mensajes %}
+          <div class="flash {{ categoria }}">{{ texto }}</div>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+  {% block content %}{% endblock %}
+</main>
+
+{% block scripts %}{% endblock %}
+</body>
+</html>

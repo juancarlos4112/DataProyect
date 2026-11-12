@@ -1,0 +1,17 @@
+{
+  "name": "Órdenes de Servicio - Rack",
+  "short_name": "Órdenes Rack",
+  "description": "Órdenes de mantención de rack con fotos y envío por correo",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#eef2f7",
+  "theme_color": "#0f172a",
+  "icons": [
+    {
+      "src": "/static/icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

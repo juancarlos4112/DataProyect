@@ -1,0 +1,11 @@
+data/
+__pycache__/
+*.pyc
+*.pyo
+*.log
+*.err
+.env
+.venv/
+.git/
+.gitignore
+iniciar.bat

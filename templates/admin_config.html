@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+{% block title %}Configuración · {{ app_name }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Configuración</h1>
+    <p class="muted">Datos de la empresa y cuenta de correo saliente.</p>
+  </div>
+</div>
+
+<form method="post" enctype="multipart/form-data" class="form">
+  <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+
+  <section class="card">
+    <h2>Empresa</h2>
+    <div class="grid2">
+      <label class="field full">
+        <span>Nombre de la empresa</span>
+        <input name="company_name" value="{{ cfg.company_name }}" placeholder="Mi Empresa SpA">
+      </label>
+      <label class="field">
+        <span>RUT</span>
+        <input name="company_rut" value="{{ cfg.company_rut }}" placeholder="76.123.456-7">
+      </label>
+      <label class="field">
+        <span>Teléfono</span>
+        <input name="company_phone" value="{{ cfg.company_phone }}" placeholder="+56 2 2345 6789">
+      </label>
+      <label class="field full">
+        <span>Dirección</span>
+        <input name="company_address" value="{{ cfg.company_address }}">
+      </label>
+      <label class="field full">
+        <span>Logo (opcional)</span>
+        <input type="file" name="logo" accept="image/*">
+        <small class="hint">Se usa en la cabecera del PDF. Máximo 600×300 px.</small>
+      </label>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Correo saliente (SMTP)</h2>
+    <p class="muted small">
+      Sin esto, las órdenes quedan guardadas y el correo se archiva en la bandeja de salida
+      (<code>data/outbox</code>) en lugar de enviarse.
+    </p>
+    <div class="grid2">
+      <label class="field">
+        <span>Servidor SMTP</span>
+        <input name="smtp_host" value="{{ cfg.smtp_host }}" placeholder="smtp.gmail.com">
+      </label>
+      <label class="field">
+        <span>Puerto</span>
+        <input name="smtp_port" value="{{ cfg.smtp_port or '587' }}" placeholder="587">
+      </label>
+      <label class="field">
+        <span>Seguridad</span>
+        <select name="smtp_security">
+          <option value="starttls" {{ 'selected' if cfg.smtp_security in ('', 'starttls') }}>STARTTLS (587)</option>
+          <option value="ssl" {{ 'selected' if cfg.smtp_security == 'ssl' }}>SSL (465)</option>
+          <option value="none" {{ 'selected' if cfg.smtp_security == 'none' }}>Sin cifrado</option>
+        </select>
+      </label>
+      <label class="field">
+        <span>Usuario SMTP</span>
+        <input name="smtp_user" value="{{ cfg.smtp_user }}" placeholder="ordenes@miempresa.cl" autocomplete="off">
+      </label>
+      <label class="field">
+        <span>Contraseña / clave de aplicación</span>
+        <input type="password" name="smtp_password" placeholder="Dejar en blanco para mantener"
+               autocomplete="new-password">
+      </label>
+      <label class="field">
+        <span>Correo remitente</span>
+        <input type="email" name="from_email" value="{{ cfg.from_email }}"
+               placeholder="ordenes@miempresa.cl">
+      </label>
+    </div>
+    <p class="hint">
+      Gmail requiere una <b>contraseña de aplicación</b> (no la clave normal) con verificación en 2 pasos.
+    </p>
+  </section>
+
+  <div class="actions">
+    <button class="btn btn-primary" type="submit">Guardar configuración</button>
+  </div>
+</form>
+
+<section class="card">
+  <h2>Probar el correo</h2>
+  <p class="muted small">Guarda primero la configuración y luego envía una prueba.</p>
+  <form method="post" action="{{ url_for('admin_config_test') }}" class="inline-form">
+    <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+    <input type="email" name="test_email" placeholder="tu-correo@empresa.cl" required>
+    <button class="btn btn-ghost" type="submit">Enviar prueba</button>
+  </form>
+</section>
+{% endblock %}

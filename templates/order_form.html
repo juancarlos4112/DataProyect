@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% block title %}Nueva orden · {{ app_name }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Nueva orden</h1>
+    <p class="muted">Registra la mantención y envíala al cliente.</p>
+  </div>
+</div>
+
+{% if not proyectos %}
+<div class="empty">
+  <h3>Falta configurar un proyecto</h3>
+  <p class="muted">Antes de crear órdenes necesitas un cliente y un proyecto con sus destinatarios de correo.</p>
+  {% if user.role == 'admin' %}
+  <a class="btn btn-primary" href="{{ url_for('admin_client_form') }}">Crear cliente</a>
+  {% endif %}
+</div>
+{% else %}
+
+<form id="orden-form" class="form" method="post" enctype="multipart/form-data"
+      action="{{ url_for('order_new') }}" novalidate>
+  <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+  <input type="hidden" name="firma" id="firma-data">
+
+  <section class="card">
+    <h2><span class="step">1</span> Datos del servicio</h2>
+    <div class="grid2">
+      <label class="field full">
+        <span>Proyecto / cliente *</span>
+        <select name="project_id" id="project_id" required>
+          <option value="">Selecciona un proyecto…</option>
+          {% for p in proyectos %}
+          <option value="{{ p.id }}" data-site="{{ p.site or '' }}" data-racks="{{ p.racks or '' }}"
+                  data-recipients="{{ p.recipients or '' }}">
+            {{ p.client_name }} — {{ p.name }}
+          </option>
+          {% endfor %}
+        </select>
+      </label>
+
+      <label class="field">
+        <span>Tipo de servicio</span>
+        <select name="type">
+          {% for valor, etiqueta in tipos.items() %}
+          <option value="{{ valor }}" {{ 'selected' if valor == 'preventiva' }}>{{ etiqueta }}</option>
+          {% endfor %}
+        </select>
+      </label>
+
+      <label class="field">
+        <span>Fecha y hora</span>
+        <input type="datetime-local" name="performed_at" value="{{ ahora }}">
+      </label>
+
+      <label class="field">
+        <span>Rack / gabinete</span>
+        <input type="text" name="rack" id="rack" placeholder="RACK-01" autocomplete="off">
+      </label>
+
+      <label class="field">
+        <span>Sitio / ubicación</span>
+        <input type="text" name="site" id="site" placeholder="Sala de servidores, piso 2" autocomplete="off">
+      </label>
+
+      <label class="field full">
+        <span>Recibe por el cliente</span>
+        <input type="text" name="receiver" placeholder="Nombre y cargo de quien recibe" autocomplete="off">
+      </label>
+    </div>
+    <p class="hint" id="destinatarios"></p>
+  </section>
+
+  <section class="card">
+    <h2><span class="step">2</span> Checklist de mantención</h2>
+    <p class="muted small">Marca el estado de cada punto y agrega una observación si corresponde.</p>
+    {% for clave, etiqueta in checklist %}
+    <div class="check-row">
+      <div class="check-label">{{ etiqueta }}</div>
+      <div class="seg">
+        <label><input type="radio" name="chk_{{ clave }}" value="ok" checked><span>OK</span></label>
+        <label><input type="radio" name="chk_{{ clave }}" value="obs"><span>Obs.</span></label>
+        <label><input type="radio" name="chk_{{ clave }}" value="na"><span>N/A</span></label>
+      </div>
+      <input class="note" type="text" name="note_{{ clave }}" maxlength="300"
+             placeholder="Observación (opcional)" autocomplete="off">
+    </div>
+    {% endfor %}
+  </section>
+
+  <section class="card">
+    <h2><span class="step">3</span> Trabajo realizado</h2>
+    <label class="field">
+      <span>Descripción de lo realizado *</span>
+      <textarea name="work" rows="5" required
+        placeholder="Detalla las actividades ejecutadas, equipos intervenidos y resultado."></textarea>
+    </label>
+    <label class="field">
+      <span>Materiales y repuestos utilizados</span>
+      <textarea name="materials" rows="2" placeholder="Ej.: 2 patch cords cat6, 4 tornillos M6…"></textarea>
+    </label>
+    <label class="field">
+      <span>Observaciones y recomendaciones</span>
+      <textarea name="observations" rows="2" placeholder="Hallazgos, riesgos o trabajos pendientes."></textarea>
+    </label>
+  </section>
+
+  <section class="card">
+    <h2><span class="step">4</span> Registro fotográfico</h2>
+    <p class="muted small">Se comprimen automáticamente antes de enviarse.</p>
+
+    <div class="photo-block">
+      <div class="photo-head"><span>Antes</span><span class="count" id="count-antes">0</span></div>
+      <div class="photo-btns">
+        <label class="btn btn-ghost">Tomar foto
+          <input type="file" accept="image/*" capture="environment" data-kind="antes" hidden>
+        </label>
+        <label class="btn btn-ghost">Galería
+          <input type="file" accept="image/*" multiple data-kind="antes" hidden>
+        </label>
+      </div>
+      <div class="thumbs" id="thumbs-antes"></div>
+    </div>
+
+    <div class="photo-block">
+      <div class="photo-head"><span>Después</span><span class="count" id="count-despues">0</span></div>
+      <div class="photo-btns">
+        <label class="btn btn-ghost">Tomar foto
+          <input type="file" accept="image/*" capture="environment" data-kind="despues" hidden>
+        </label>
+        <label class="btn btn-ghost">Galería
+          <input type="file" accept="image/*" multiple data-kind="despues" hidden>
+        </label>
+      </div>
+      <div class="thumbs" id="thumbs-despues"></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2><span class="step">5</span> Firma</h2>
+    <p class="muted small">Firma del técnico o de quien recibe el servicio.</p>
+    <canvas id="firma" class="firma" aria-label="Área de firma"></canvas>
+    <button type="button" class="btn btn-ghost" id="limpiar-firma">Limpiar firma</button>
+  </section>
+
+  <div class="submitbar">
+    <button class="btn btn-primary btn-block" type="submit" id="btn-enviar">
+      Enviar orden por correo
+    </button>
+  </div>
+</form>
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/order.js') }}"></script>
+{% endblock %}

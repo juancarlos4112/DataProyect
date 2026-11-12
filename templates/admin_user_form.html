@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}{{ 'Editar' if usuario else 'Nuevo' }} usuario · {{ app_name }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>{{ 'Editar usuario' if usuario else 'Nuevo usuario' }}</h1>
+    <p class="muted">Los técnicos solo ven sus propias órdenes.</p>
+  </div>
+</div>
+
+<form method="post" class="form">
+  <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+  <section class="card">
+    <div class="grid2">
+      <label class="field full">
+        <span>Nombre *</span>
+        <input name="name" required value="{{ usuario.name if usuario else '' }}">
+      </label>
+      <label class="field">
+        <span>Correo *</span>
+        <input type="email" name="email" required value="{{ usuario.email if usuario else '' }}">
+      </label>
+      <label class="field">
+        <span>Rol</span>
+        <select name="role">
+          <option value="tech" {{ 'selected' if usuario and usuario.role == 'tech' }}>Técnico</option>
+          <option value="admin" {{ 'selected' if usuario and usuario.role == 'admin' }}>Administrador</option>
+        </select>
+      </label>
+      <label class="field full">
+        <span>{{ 'Nueva contraseña (opcional)' if usuario else 'Contraseña *' }}</span>
+        <input type="password" name="password" {{ 'required' if not usuario }}
+               autocomplete="new-password" minlength="8" placeholder="Mínimo 8 caracteres">
+      </label>
+    </div>
+  </section>
+  <div class="actions">
+    <button class="btn btn-primary" type="submit">Guardar usuario</button>
+    <a class="btn btn-ghost" href="{{ url_for('admin_users') }}">Cancelar</a>
+  </div>
+</form>
+{% endblock %}

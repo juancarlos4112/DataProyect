@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+{% block title %}Órdenes · {{ app_name }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Hola, {{ user.name.split(' ')[0] }}</h1>
+    <p class="muted">{{ today }} · panel de órdenes de mantención</p>
+  </div>
+  <a class="btn btn-primary" href="{{ url_for('order_new') }}">+ Nueva orden</a>
+</div>
+
+<div class="stats">
+  <div class="stat"><span class="stat-n">{{ total }}</span><span class="stat-l">Órdenes</span></div>
+  <div class="stat"><span class="stat-n">{{ del_mes }}</span><span class="stat-l">Este mes</span></div>
+  <div class="stat"><span class="stat-n ok">{{ enviadas }}</span><span class="stat-l">Enviadas</span></div>
+  <div class="stat"><span class="stat-n warn">{{ pendientes }}</span><span class="stat-l">Pendientes</span></div>
+</div>
+
+<h2 class="section-title">Últimas órdenes</h2>
+
+{% if ordenes %}
+<div class="list">
+  {% for o in ordenes %}
+  <a class="row" href="{{ url_for('order_view', oid=o.id) }}">
+    <div class="row-main">
+      <div class="row-top">
+        <strong>{{ o.code }}</strong>
+        <span class="chip">{{ o.type|tipo }}</span>
+      </div>
+      <div class="row-sub">{{ o.client_name }} · {{ o.project_name }}</div>
+      <div class="row-meta">{{ o.performed_at|fecha }} · {{ o.tech_name }}</div>
+    </div>
+    <div class="row-side">
+      {% if o.email_status == 'enviado' %}
+        <span class="chip ok">Enviada</span>
+      {% elif o.email_status == 'simulado' %}
+        <span class="chip warn">Sin SMTP</span>
+      {% elif o.email_status == 'error' %}
+        <span class="chip err">Falló</span>
+      {% else %}
+        <span class="chip">Pendiente</span>
+      {% endif %}
+    </div>
+  </a>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty">
+  <h3>Todavía no hay órdenes</h3>
+  <p class="muted">Crea la primera orden de mantención y envíala al cliente.</p>
+  <a class="btn btn-primary" href="{{ url_for('order_new') }}">Crear orden</a>
+</div>
+{% endif %}
+{% endblock %}

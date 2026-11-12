@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Proyectos · {{ app_name }}{% endblock %}
+{% block content %}
+<div class="page-head">
+  <div>
+    <h1>Proyectos</h1>
+    <p class="muted">Cada proyecto define el sitio, los racks y quién recibe el correo.</p>
+  </div>
+  <a class="btn btn-primary" href="{{ url_for('admin_project_form') }}">+ Proyecto</a>
+</div>
+
+{% if proyectos %}
+<div class="list">
+  {% for p in proyectos %}
+  <div class="row">
+    <div class="row-main">
+      <div class="row-top">
+        <strong>{{ p.name }}</strong>
+        {% if not p.active %}<span class="chip">Inactivo</span>{% endif %}
+      </div>
+      <div class="row-sub">{{ p.client_name }}{% if p.site %} · {{ p.site }}{% endif %}</div>
+      <div class="row-meta">{{ p.ordenes }} orden(es) · {{ p.recipients or 'sin destinatarios' }}</div>
+    </div>
+    <div class="row-actions">
+      <a class="btn btn-ghost btn-sm" href="{{ url_for('admin_project_form', pid=p.id) }}">Editar</a>
+      <form method="post" action="{{ url_for('admin_project_toggle', pid=p.id) }}">
+        <input type="hidden" name="_csrf" value="{{ csrf_token() }}">
+        <button class="btn btn-ghost btn-sm" type="submit">{{ 'Desactivar' if p.active else 'Activar' }}</button>
+      </form>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% else %}
+<div class="empty">
+  <h3>Sin proyectos</h3>
+  <p class="muted">Crea un proyecto y define los correos que recibirán las órdenes.</p>
+  <a class="btn btn-primary" href="{{ url_for('admin_project_form') }}">Crear proyecto</a>
+</div>
+{% endif %}
+{% endblock %}

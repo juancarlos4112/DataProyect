@@ -122,6 +122,16 @@ def _wants_json():
             or "application/json" in (request.headers.get("Accept") or ""))
 
 
+@app.after_request
+def _sin_cache(resp):
+    """Evita que el navegador reutilice formularios viejos (listas desactualizadas)."""
+    if request.endpoint != "static" and resp.mimetype == "text/html":
+        resp.headers["Cache-Control"] = "no-store, no-cache, must-revalidate, max-age=0"
+        resp.headers["Pragma"] = "no-cache"
+        resp.headers["Expires"] = "0"
+    return resp
+
+
 @app.before_request
 def _load_user():
     uid = session.get("uid")
@@ -573,6 +583,7 @@ def admin_project_form(pid=None):
     if pid and not proyecto:
         abort(404)
     clientes = db.query("SELECT * FROM clients WHERE active = 1 ORDER BY name")
+    cliente_sel = request.args.get("cliente", type=int)
     if request.method == "POST":
         nombre = (request.form.get("name") or "").strip()
         client_id = request.form.get("client_id", type=int)
@@ -597,7 +608,8 @@ def admin_project_form(pid=None):
                                datos + (db.now_iso(),))
                 flash("Proyecto guardado.", "ok")
                 return redirect(url_for("admin_projects"))
-    return render_template("admin_project_form.html", proyecto=proyecto, clientes=clientes)
+    return render_template("admin_project_form.html", proyecto=proyecto, clientes=clientes,
+                           cliente_sel=cliente_sel)
 
 
 @app.route("/admin/proyectos/<int:pid>/estado", methods=["POST"])

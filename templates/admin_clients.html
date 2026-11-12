@@ -22,6 +22,7 @@
       <div class="row-meta">{{ c.proyectos }} proyecto(s){% if c.contact %} · {{ c.contact }}{% endif %}</div>
     </div>
     <div class="row-actions">
+      <a class="btn btn-ghost btn-sm" href="{{ url_for('admin_project_form', cliente=c.id) }}">+ Proyecto</a>
       <a class="btn btn-ghost btn-sm" href="{{ url_for('admin_client_form', cid=c.id) }}">Editar</a>
       <form method="post" action="{{ url_for('admin_client_toggle', cid=c.id) }}">
         <input type="hidden" name="_csrf" value="{{ csrf_token() }}">

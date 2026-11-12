@@ -24,7 +24,7 @@
         <select name="client_id" required>
           <option value="">Selecciona…</option>
           {% for c in clientes %}
-          <option value="{{ c.id }}" {{ 'selected' if proyecto and proyecto.client_id == c.id }}>{{ c.name }}</option>
+          <option value="{{ c.id }}" {{ 'selected' if (proyecto and proyecto.client_id == c.id) or (not proyecto and cliente_sel == c.id) }}>{{ c.name }}</option>
           {% endfor %}
         </select>
       </label>

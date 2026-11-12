@@ -97,6 +97,8 @@ def _ctx():
         "csrf_token": csrf_token,
         "app_name": "Órdenes de Servicio",
         "company": db.get_setting("company_name") or "Mi Empresa",
+        "smtp_listo": bool((db.get_setting("smtp_host") or "").strip()
+                           and (db.get_setting("smtp_user") or "").strip()),
         "today": db.now().strftime("%d-%m-%Y"),
     }
 
@@ -507,8 +509,13 @@ def order_resend(oid):
                                     db.settings_dict(SETTING_KEYS))
     db.execute("UPDATE orders SET email_status = ?, email_detail = ? WHERE id = ?",
                (estado, detalle, oid))
-    flash("Correo reenviado." if estado == "enviado" else "No se pudo enviar: %s" % detalle,
-          "ok" if estado == "enviado" else "error")
+    if estado == "enviado":
+        flash("Correo reenviado a %s." % (orden.get("email_to") or "los destinatarios"), "ok")
+    elif estado == "simulado":
+        flash("El correo saliente aún no está configurado. La orden quedó archivada en la bandeja "
+              "de salida del servidor. Ve a Configuración para activar el envío real.", "error")
+    else:
+        flash("No se pudo enviar: %s" % detalle, "error")
     return redirect(url_for("order_view", oid=oid))
 
 

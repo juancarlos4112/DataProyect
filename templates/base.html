@@ -36,6 +36,12 @@
 {% endif %}
 
 <main class="wrap">
+  {% if user and user.role == 'admin' and not smtp_listo %}
+  <div class="flash error">
+    El correo saliente no está configurado: las órdenes se generan y quedan archivadas,
+    pero no se envían. <a href="{{ url_for('admin_config') }}">Configurar ahora</a>
+  </div>
+  {% endif %}
   {% with mensajes = get_flashed_messages(with_categories=true) %}
     {% if mensajes %}
       <div class="flashes">

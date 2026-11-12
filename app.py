@@ -109,7 +109,12 @@ def _csrf_protect():
     if not token or token != session.get("_csrf"):
         if _wants_json():
             return jsonify({"ok": False, "error": "Sesión expirada. Recarga la página."}), 400
-        abort(400)
+        # Envío duplicado (doble toque en el celular) o formulario viejo:
+        # si la sesión ya está iniciada, al panel; si no, al login con un aviso.
+        if session.get("uid"):
+            return redirect(url_for("dashboard"))
+        flash("La sesión se renovó. Ingresa de nuevo, por favor.", "error")
+        return redirect(url_for("login"))
 
 
 def _wants_json():
@@ -172,6 +177,16 @@ def _destino_seguro(valor):
 @app.route("/salud")
 def salud():
     return jsonify({"ok": True, "servicio": "ordenes-rack"})
+
+
+@app.errorhandler(400)
+def _error_400(_e):
+    if _wants_json():
+        return jsonify({"ok": False, "error": "Solicitud inválida."}), 400
+    return render_template(
+        "error.html",
+        mensaje="La solicitud llegó incompleta o repetida. No se guardó ningún cambio.",
+    ), 400
 
 
 # ---------------------------------------------------------------------------

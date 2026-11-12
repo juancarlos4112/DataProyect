@@ -20,8 +20,15 @@
       <span>Contraseña</span>
       <input type="password" name="password" autocomplete="current-password" required placeholder="••••••••">
     </label>
-    <button class="btn btn-primary btn-block" type="submit">Ingresar</button>
+    <button class="btn btn-primary btn-block" type="submit" id="btn-ingresar">Ingresar</button>
   </form>
   <p class="muted small">Si olvidaste tu clave, pídele al administrador que la restablezca.</p>
 </section>
+<script>
+  // Evita el doble toque: al enviar, bloquea el botón una sola vez.
+  document.querySelector('form').addEventListener('submit', function () {
+    var b = document.getElementById('btn-ingresar');
+    if (b) { b.disabled = true; b.textContent = 'Ingresando...'; }
+  });
+</script>
 {% endblock %}

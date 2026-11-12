@@ -1,0 +1,11 @@
+{% extends "base.html" %}
+{% block title %}No se pudo completar · {{ app_name }}{% endblock %}
+{% block content %}
+<section class="login-card">
+  <div class="login-logo"><span class="brand-dot"></span></div>
+  <h1>No se pudo completar</h1>
+  <p class="muted">{{ mensaje }}</p>
+  <p class="muted small">Vuelve a la página anterior y envía el formulario una sola vez.</p>
+  <a class="btn btn-primary btn-block" href="{{ url_for('login') }}">Volver al ingreso</a>
+</section>
+{% endblock %}
